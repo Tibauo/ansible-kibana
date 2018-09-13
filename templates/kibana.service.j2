@@ -1,0 +1,11 @@
+[Unit]
+Description=Kibana
+Documentation=https://www.elastic.co/guide/en/kibana/current/getting-started.html
+
+[Service]
+User={{ kibana_group }}
+Group={{ kibana_user }}
+ExecStart={{ kibana_path }}/{{ kibana_folder }}/bin/kibana
+
+[Install]
+WantedBy=multi-user.target

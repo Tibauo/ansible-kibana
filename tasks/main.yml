@@ -1,0 +1,75 @@
+---
+# tasks file for kibana
+- name: Include OS-specific variables.
+  include_vars: "{{ ansible_os_family }}.yml"
+
+- name: Check folder exists
+  stat:
+    path: "{{ kibana_path }}/{{ kibana_folder }}"
+  register: folder_kibana
+
+- name: Install Java
+  become: yes
+  package:
+    name: "{{ item }}"
+    state: present
+  with_items: "{{ required_package }}"
+  when: folder_kibana.stat.exists == False
+
+- name: Create group
+  become: yes
+  group:
+    name: "{{ kibana_group }}"
+    state: present
+    system: yes
+  when: folder_kibana.stat.exists == False
+
+- name: Create user
+  become: yes
+  user:
+    name: "{{ kibana_user }}"
+    state: present
+    system: yes
+  when: folder_kibana.stat.exists == False
+
+- name: Get kibana
+  become: yes
+  unarchive:
+    src: "{{ kibana_dl }}"
+    dest: "{{ kibana_path }}"
+    remote_src: yes
+  when: folder_kibana.stat.exists == False
+
+- name: Deploy conf kibana
+  become: yes
+  template:
+    src: kibana.yml.j2
+    dest: "{{ kibana_path }}/{{ kibana_folder }}/config/kibana.yml"
+    owner: "{{ kibana_user }}"
+    group: "{{ kibana_group }}"
+  when: folder_kibana.stat.exists == False
+
+- name: Set user as owner
+  become: yes
+  file:
+    path: "{{ kibana_path }}/{{ kibana_folder }}"
+    owner: "{{ kibana_user }}"
+    group: "{{ kibana_group }}"
+    recurse: yes
+  when: folder_kibana.stat.exists == False
+
+- name: Create systemd
+  become: yes
+  template:
+    src: kibana.service.j2
+    dest: /etc/systemd/system/kibana.service
+  when: folder_kibana.stat.exists == False
+
+- name: Start Service
+  become: yes
+  systemd:
+    name: kibana
+    state: started
+    enabled: yes
+    daemon_reload: yes
+  when: folder_kibana.stat.exists == False

@@ -1,0 +1,15 @@
+---
+# defaults file for logstash
+kibana_group: kibana
+kibana_user: kibana
+
+kibana_path: /opt
+kibana_version: 6.4.0
+kibana_folder: kibana-{{ kibana_version }}-linux-x86_64
+kibana_dl: https://artifacts.elastic.co/downloads/kibana/{{ kibana_folder }}.tar.gz
+
+kibana_port: 5601
+kibana_host: 0.0.0.0
+
+elasticsearch_address: localhost:9200
+elasticsearch_url: http://{{ elasticsearch_address }}
